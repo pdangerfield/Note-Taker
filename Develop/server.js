@@ -37,48 +37,57 @@ app.get('/api/notes', (req, res) => {
 app.post('/api/notes', (req, res) => {
   res.status(201).json(`${req.method} request received to add a note`);
 
-  const { title, text } = req.body;
+  const { title, text, id } = req.body;
 
-  if(title && text){
+  if (title && text && id) {
     const newNote = {
       title,
       text,
+      id,
     };
   
-
- // Obtain existing notes
- fs.readFile('./db/db.json', 'utf8', (err, data) => {
-  if (err) {
-    console.error(err);
+    // Obtain existing notes
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+      } else {
+        // Convert string into JSON object
+        const parsedNotes = JSON.parse(data);
+  
+        // Add a new review
+        parsedNotes.push(newNote);
+  
+        // Write updated reviews back to the file
+        fs.writeFile(
+          './db/db.json',
+          JSON.stringify(parsedNotes, null, 4),
+          (writeErr) =>
+            writeErr
+              ? console.error(writeErr)
+              : console.info('Successfully updated reviews!')
+        );
+      }
+    });
+  
+    const response = {
+      status: 'success',
+      body: newNote,
+    };
+  
+    console.log(response);
+    res.status(201).json(response);
   } else {
-    // Convert string into JSON object
-    const parsedNotes = JSON.parse(data);
-
-    // Add a new review
-    parsedNotes.push(newNote);
-
-    // Write updated reviews back to the file
-    fs.writeFile(
-      './db/db.json',
-      JSON.stringify(parsedNotes, null, 4),
-      (writeErr) =>
-        writeErr
-          ? console.error(writeErr)
-          : console.info('Successfully updated reviews!')
-    );
-  }
-});
-
-const response = {
-  status: 'success',
-  body: newNote,
-};
-
-console.log(response);
-  res.status(201).json(response);
-} else {
-  res.status(500).json('Error in posting note');
+    res.status(500).json('Error in posting note');
 }
+});
+app.delete('/api/notes/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const data = fs.readFileSync('./db/db.json', 'utf8');
+  const notes = JSON.parse(data);
+
+  const filteredNotes = notes.filter((note) => note.id !== id);
+  fs.writeFile('./db/db.json', JSON.stringify(filteredNotes, null, 4));
+  res.status(200).json(`${req.method} request received to delete a note`);
 });
 
 app.listen(PORT, () =>
