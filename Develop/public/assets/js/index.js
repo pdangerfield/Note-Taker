@@ -12,6 +12,7 @@ if (window.location.pathname === '/notes') {
   noteList = document.querySelectorAll('.list-container .list-group');
 }
 
+
 // Show an element
 const show = (elem) => {
   elem.style.display = 'inline';
@@ -45,6 +46,14 @@ const saveNote = (note) =>
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(note),
+  })
+  .then((response) => response.json())
+  .then((data) => {
+    // alert(data);
+    // createLi(note);
+  })
+  .catch((error) => {
+    console.error('Error:', error);
   });
 
 const deleteNote = (id) =>
@@ -55,7 +64,7 @@ const deleteNote = (id) =>
     },
   });
 
-getNotes().then((data) => data.forEach((note) => createLi(note)));
+
 
 const renderActiveNote = () => {
   hide(saveNoteBtn);
@@ -125,7 +134,7 @@ const handleRenderSaveBtn = () => {
 
 // Render the list of note titles
 const renderNoteList = async (notes) => {
-  let jsonNotes = await notes.json();
+  // let jsonNotes = await notes.json();
   if (window.location.pathname === '/notes') {
     noteList.forEach((el) => (el.innerHTML = ''));
   }
@@ -160,6 +169,8 @@ const renderNoteList = async (notes) => {
 
     return liEl;
   };
+
+  const jsonNotes = await notes;
 
   if (jsonNotes.length === 0) {
     noteListItems.push(createLi('No saved Notes', false));
