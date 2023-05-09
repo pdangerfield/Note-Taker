@@ -1,8 +1,9 @@
 const express = require('express');
 const path = require('path');
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3003;
 const fs = require('fs');
 const api = require('./routes/index.js')
+const uuid = require('./helpers/uuid.js');
 
 
 const app = express();
@@ -37,12 +38,13 @@ app.get('/api/notes', (req, res) => {
 app.post('/api/notes', (req, res) => {
   res.status(201).json(`${req.method} request received to add a note`);
 
-  const { title, text } = req.body;
+  const { title, text, id } = req.body;
 
-  if (title && text ) {
+  if (title && text && id) {
     const newNote = {
       title,
       text,
+      id: uuid(),
     };
   
     // Obtain existing notes
@@ -79,14 +81,25 @@ app.post('/api/notes', (req, res) => {
     res.status(500).json('Error in posting note');
 }
 });
-app.delete('/api/notes/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const data = fs.readFileSync('./db/db.json', 'utf8');
+app.delete('/api/notes/:id', function (req, res) {
+  const id = req.params.id;
+  console.log(id);
+  
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+    }
   const notes = JSON.parse(data);
 
-  const filteredNotes = notes.filter((note) => note.id !== id);
-  fs.writeFile('./db/db.json', JSON.stringify(filteredNotes, null, 4));
-  res.status(200).json(`${req.method} request received to delete a note`);
+  const filteredNotes = notes.filter(note => note.id !== id);
+  fs.writeFile('./db/db.json', JSON.stringify(filteredNotes), (err) => {
+  if (err) {
+    console.error(err);
+  }
+});
+  // res.status(200).json(`${req.method} request received to delete a note`);
+  res.json(filteredNotes);
+});
 });
 
 app.listen(PORT, () =>

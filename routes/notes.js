@@ -11,12 +11,13 @@ notes.post('/', (req, res) => {
     console.info(`${req.method} request received to add a note`);
     console.log(req.body);
 
-    const { title, text } = req.body;
+    const { title, text, id } = req.body;
 
     if (req.body) {
         const newNote = {
             title,
             text,
+            id,
         };
 
         readAndAppend(newNote, './db/db.json');
