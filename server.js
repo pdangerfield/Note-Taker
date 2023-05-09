@@ -37,13 +37,12 @@ app.get('/api/notes', (req, res) => {
 app.post('/api/notes', (req, res) => {
   res.status(201).json(`${req.method} request received to add a note`);
 
-  const { title, text, id } = req.body;
+  const { title, text } = req.body;
 
-  if (title && text && id) {
+  if (title && text ) {
     const newNote = {
       title,
       text,
-      id,
     };
   
     // Obtain existing notes
